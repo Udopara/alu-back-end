@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-import sys
 import requests
+import sys
 
 def get_employee_todo_progress(employee_id):
     # Get user info
