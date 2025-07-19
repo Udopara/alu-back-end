@@ -1,40 +1,48 @@
 #!/usr/bin/python3
+"""
+Fetches and displays TODO list progress of a given employee using a REST API
+"""
+
 import requests
 import sys
 
+
 def get_employee_todo_progress(employee_id):
-    # Get user info
+    """
+    Retrieves and prints the TODO list progress for the specified employee.
+    """
     user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
-    response = requests.get(user_url)
-    if response.status_code != 200:
+    todos_url = f'https://jsonplaceholder.typicode.com/todos?userId={employee_id}'
+
+    user_response = requests.get(user_url)
+    user = user_response.json()
+
+    employee_name = user.get('name')
+    if not employee_name:
         print("Employee not found.")
         return
 
-    user = response.json()
-    employee_name = user.get('name')
+    todos_response = requests.get(todos_url)
+    todos = todos_response.json()
 
-    # Get user's TODOs
-    todos_url = f'https://jsonplaceholder.typicode.com/todos?userId={employee_id}'
-    response = requests.get(todos_url)
-    todos = response.json()
-
-    # Filter completed tasks
-    completed_tasks = [task for task in todos if task['completed']]
     total_tasks = len(todos)
+    completed_tasks = [task for task in todos if task.get('completed') is True]
     done_tasks = len(completed_tasks)
 
-    # Print the output
     print(f"Employee {employee_name} is done with tasks({done_tasks}/{total_tasks}):")
     for task in completed_tasks:
-        print(f"\t {task['title']}")
+        print(f"\t {task.get('title')}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python3 script.py <employee_id>")
+        print("Usage: ./todo_progress.py <employee_id>")
         sys.exit(1)
+
     try:
-        emp_id = int(sys.argv[1])
-        get_employee_todo_progress(emp_id)
+        employee_id = int(sys.argv[1])
+        get_employee_todo_progress(employee_id)
     except ValueError:
-        print("Please enter a valid integer for employee ID.")
+        print("Please provide a valid integer employee ID.")
         sys.exit(1)
+
